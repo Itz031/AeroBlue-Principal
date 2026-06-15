@@ -246,7 +246,7 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
                     
                     try {
                       // LLAMADA REAL A INTERNET: Reemplaza con tu url de Render
-                      final urlApi = Uri.parse('https://aeroblue-api.onrender.com/api/reportes');
+                      final urlApi = Uri.parse('https://aeroblue-soporte-yfd1.onrender.com');
                       
                       final respuesta = await http.post(
                         urlApi,
