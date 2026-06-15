@@ -1,0 +1,44 @@
+name: aero_blue
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  http: ^1.6.0
+  sqflite: ^2.4.2+1
+  path: ^1.9.1
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.0
+  provider: ^6.1.2
+  fl_chart: ^0.68.0
+  firebase_core: ^4.7.0
+  firebase_messaging: ^16.2.0
+  flutter_local_notifications: ^17.0.0
+  geolocator: ^14.0.3
+  geocoding: ^4.0.0
+  url_launcher: ^6.3.2
+  shared_preferences: ^2.5.5
+  workmanager: ^0.9.0+3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: "^0.13.1"
+
+flutter:
+  uses-material-design: true
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo_aeroblue.png" 
+  min_sdk_android: 21
