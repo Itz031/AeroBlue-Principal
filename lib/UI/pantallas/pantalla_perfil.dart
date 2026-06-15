@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart'; // <- Importación necesaria para abrir la web
 import '../../backend/db/db_helper.dart';
 import '../../backend/servicios/servicio_sesion.dart';
 
@@ -407,7 +408,41 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
             ],
           ),
         ),
-        const SizedBox(height: 40),
+        const SizedBox(height: 30),
+        
+        // --- AQUÍ ESTÁ EL BOTÓN NUEVO DE REPORTAR PROBLEMAS ---
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: ElevatedButton.icon(
+            onPressed: () async {
+              // 1. Obtenemos el correo del usuario logueado
+              final correoUsuario = _ctrlCorreo.text.trim();
+              
+              // 2. Se lo pegamos a la URL de tu página web
+              final Uri url = Uri.parse('https://tu-pagina-web.onrender.com?correo=$correoUsuario'); 
+              
+              try {
+                if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                  _mostrarNotificacion('No se pudo abrir el navegador', Icons.error_outline, Colors.red);
+                }
+              } catch (e) {
+                _mostrarNotificacion('Error al abrir la web', Icons.error_outline, Colors.red);
+              }
+            },
+            
+            icon: const Icon(Icons.support_agent_rounded, size: 20),
+            label: const Text('Reportar un problema', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1E88E5),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+          ),
+        ),
+        const SizedBox(height: 15),
+        // --- FIN DEL BOTÓN NUEVO ---
+
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: OutlinedButton.icon(
