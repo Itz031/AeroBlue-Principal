@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../backend/db/db_helper.dart';
 import '../../backend/servicios/servicio_sesion.dart';
+import 'dart:convert'; 
+import 'package:http/http.dart' as http;
+
 
 class PantallaPerfil extends StatefulWidget {
   const PantallaPerfil({super.key});
@@ -241,12 +244,28 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
                     if (ctrlReporte.text.trim().isEmpty) return;
                     setStateDialog(() => enviando = true);
                     
-                    // AQUÍ EN EL FUTURO HARÁS EL POST A TU API (ej. http.post)
-                    await Future.delayed(const Duration(seconds: 2)); 
-                    
-                    if (mounted) {
-                      Navigator.pop(contextoDialogo);
-                      _mostrarNotificacion('Reporte enviado con éxito. Te avisaremos cuando se resuelva.', Icons.check_circle_rounded, Colors.green);
+                    try {
+                      // LLAMADA REAL A INTERNET: Reemplaza con tu url de Render
+                      final urlApi = Uri.parse('https://aeroblue-api.onrender.com/api/reportes');
+                      
+                      final respuesta = await http.post(
+                        urlApi,
+                        headers: {"Content-Type": "application/json"},
+                        body: jsonEncode({
+                          "correo": _ctrlCorreo.text.trim(),
+                          "descripcion": ctrlReporte.text.trim()
+                        }),
+                      );
+
+                      if (respuesta.statusCode == 200 && mounted) {
+                        Navigator.pop(contextoDialogo);
+                        _mostrarNotificacion('Reporte enviado con éxito. Te avisaremos cuando se resuelva.', Icons.check_circle_rounded, Colors.green);
+                      } else {
+                        throw Exception("Error del servidor");
+                      }
+                    } catch (e) {
+                      setStateDialog(() => enviando = false);
+                      _mostrarNotificacion('Error de conexión. Inténtalo más tarde.', Icons.error_outline_rounded, Colors.red);
                     }
                   },
                   child: enviando 
