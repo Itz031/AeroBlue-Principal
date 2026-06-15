@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart'; // <- Importación necesaria para abrir la web
 import '../../backend/db/db_helper.dart';
 import '../../backend/servicios/servicio_sesion.dart';
 
@@ -92,7 +91,6 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
       await ServicioSesion.iniciarSesion(idEncontrado, "Usuario");
       await _cargarDatosDelUsuario(); 
       await ServicioSesion.iniciarSesion(idEncontrado, _ctrlNombre.text);
-
       _mostrarNotificacion('¡Bienvenido de nuevo!', Icons.waving_hand_rounded, const Color(0xFF1E88E5));
     } else {
       setState(() => _cargandoDatos = false);
@@ -183,6 +181,83 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
           ),
         ),
       ),
+    );
+  }
+
+  // DIÁLOGO DE REPORTE INTEGRADO EN LA APP
+  void _mostrarDialogoReporte(BuildContext context) {
+    final TextEditingController ctrlReporte = TextEditingController();
+    bool enviando = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (contextoDialogo) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              title: const Text('Reportar un problema', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Tu correo:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                    const SizedBox(height: 5),
+                    TextField(
+                      controller: TextEditingController(text: _ctrlCorreo.text), // Toma el correo de la sesión
+                      enabled: false, // Lo bloquea para que no lo editen
+                      style: const TextStyle(color: Colors.grey),
+                      decoration: InputDecoration(
+                        filled: true, fillColor: Colors.grey.shade100,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    const Text('Descripción del problema:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
+                    const SizedBox(height: 5),
+                    TextField(
+                      controller: ctrlReporte,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        hintText: 'Ej. La aplicación se cierra al abrir el mapa...',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF1E88E5), width: 2)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: enviando ? null : () => Navigator.pop(contextoDialogo),
+                  child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1E88E5), foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                  onPressed: enviando ? null : () async {
+                    if (ctrlReporte.text.trim().isEmpty) return;
+                    setStateDialog(() => enviando = true);
+                    
+                    // AQUÍ EN EL FUTURO HARÁS EL POST A TU API (ej. http.post)
+                    await Future.delayed(const Duration(seconds: 2)); 
+                    
+                    if (mounted) {
+                      Navigator.pop(contextoDialogo);
+                      _mostrarNotificacion('Reporte enviado con éxito. Te avisaremos cuando se resuelva.', Icons.check_circle_rounded, Colors.green);
+                    }
+                  },
+                  child: enviando 
+                    ? const SizedBox(width: 15, height: 15, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
+                    : const Text('Enviar'),
+                ),
+              ],
+            );
+          }
+        );
+      },
     );
   }
 
@@ -410,26 +485,11 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
         ),
         const SizedBox(height: 30),
         
-        // --- AQUÍ ESTÁ EL BOTÓN NUEVO DE REPORTAR PROBLEMAS ---
+        // --- BOTÓN DE REPORTE ACTUALIZADO ---
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: ElevatedButton.icon(
-            onPressed: () async {
-              // 1. Obtenemos el correo del usuario logueado
-              final correoUsuario = _ctrlCorreo.text.trim();
-              
-              // 2. Se lo pegamos a la URL de tu página web
-              final Uri url = Uri.parse('https://tu-pagina-web.onrender.com?correo=$correoUsuario'); 
-              
-              try {
-                if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-                  _mostrarNotificacion('No se pudo abrir el navegador', Icons.error_outline, Colors.red);
-                }
-              } catch (e) {
-                _mostrarNotificacion('Error al abrir la web', Icons.error_outline, Colors.red);
-              }
-            },
-            
+            onPressed: () => _mostrarDialogoReporte(context),
             icon: const Icon(Icons.support_agent_rounded, size: 20),
             label: const Text('Reportar un problema', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
             style: ElevatedButton.styleFrom(
@@ -441,7 +501,6 @@ class _PantallaPerfilState extends State<PantallaPerfil> {
           ),
         ),
         const SizedBox(height: 15),
-        // --- FIN DEL BOTÓN NUEVO ---
 
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
